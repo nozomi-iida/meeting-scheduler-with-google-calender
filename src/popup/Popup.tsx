@@ -1,15 +1,17 @@
 import { ReactElement, useEffect, useState } from 'react';
 const Popup = (): ReactElement => {
-  const [isSignIn, setIsSignIn] = useState(false);
+  const [isSignIn, setIsSignIn] = useState(true);
 
   const onClick = () => {
     chrome.identity.getAuthToken({ interactive: true }, function (token) {
+      chrome.storage.local.set({ token });
       setIsSignIn(!!token);
     });
   };
   useEffect(() => {
     chrome.identity.getAuthToken({}, function (token) {
       if (token) {
+        chrome.storage.local.set({ token });
         setIsSignIn(!!token);
       }
     });
