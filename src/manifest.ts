@@ -9,12 +9,6 @@ const manifest: ManifestV3Export = {
   background: {
     service_worker: 'src/background/index.ts',
   },
-  content_scripts: [
-    {
-      matches: ['http://*/*', 'https://*/*', 'file:///*'],
-      js: ['src/content/index.tsx'],
-    },
-  ],
   host_permissions: ['<all_urls>'],
   options_ui: {
     page: 'src/options/options.html',
@@ -44,7 +38,11 @@ const manifest: ManifestV3Export = {
     '48': 'images/extension_48.png',
     '128': 'images/extension_128.png',
   },
-  permissions: ['storage', 'tabs'],
+  permissions: ['storage', 'tabs', 'identity'],
+  oauth2: {
+    client_id: '864721882424-mjqtouoq25u43pb2d8cbvvfsdg5shnq5.apps.googleusercontent.com',
+    scopes: ['https://www.googleapis.com/auth/calendar.readonly'],
+  },
 };
 
 export default manifest;

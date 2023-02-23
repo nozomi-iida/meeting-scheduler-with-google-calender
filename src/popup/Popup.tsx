@@ -1,11 +1,31 @@
-import React, { ReactElement } from 'react';
-
+import { ReactElement, useEffect, useState } from 'react';
 const Popup = (): ReactElement => {
-  document.body.style.width = '15rem';
-  document.body.style.height = '15rem';
+  const [isSignIn, setIsSignIn] = useState(false);
+
+  const onClick = () => {
+    chrome.identity.getAuthToken({ interactive: true }, function (token) {
+      setIsSignIn(!!token);
+    });
+  };
+  useEffect(() => {
+    chrome.identity.getAuthToken({}, function (token) {
+      if (token) {
+        setIsSignIn(!!token);
+      }
+    });
+  }, []);
+
   return (
-    <div className="flex h-screen items-center justify-center">
-      <h1>Popup</h1>
+    <div className="p-4 flex flex-col gap-4">
+      <h1 className="whitespace-nowrap text-2xl">Meeting Scheduler</h1>
+      {!isSignIn && (
+        <button
+          onClick={onClick}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded block mx-auto"
+        >
+          Sign In
+        </button>
+      )}
     </div>
   );
 };
