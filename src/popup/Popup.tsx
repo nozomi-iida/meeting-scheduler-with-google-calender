@@ -35,6 +35,8 @@ const Popup = (): ReactElement => {
       const calenderItems: CalenderEvent[] = eventsData.items;
 
       calenderItems.forEach((item) => {
+        if (new Date().getTime() > new Date(item.start.dateTime).getTime()) return;
+
         const meetingUrls = extractUrlsFromString(item.description);
         if (item.hangoutLink) {
           meetingUrls.push(item.hangoutLink);
