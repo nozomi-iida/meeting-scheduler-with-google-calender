@@ -38,7 +38,7 @@ const manifest: ManifestV3Export = {
     '48': 'images/extension_48.png',
     '128': 'images/extension_128.png',
   },
-  permissions: ['storage', 'identity'],
+  permissions: ['storage', 'identity', 'alarms', 'notifications'],
   oauth2: {
     client_id: '864721882424-mjqtouoq25u43pb2d8cbvvfsdg5shnq5.apps.googleusercontent.com',
     scopes: ['https://www.googleapis.com/auth/calendar.readonly'],

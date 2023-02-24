@@ -28,6 +28,8 @@
   "dependencies": {
     "@eduardoac-skimlinks/webext-redux": "3.0.1-release-candidate",
     "@reduxjs/toolkit": "1.8.4",
+    "dayjs": "1.11.7",
+    "qs": "6.11.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-redux": "7.2.8",
@@ -48,6 +50,7 @@
     "@types/glob": "7.2.0",
     "@types/jest": "28.1.6",
     "@types/lodash": "4.14.182",
+    "@types/qs": "6.9.7",
     "@types/react": "18.0.17",
     "@types/react-dom": "18.0.6",
     "@types/redux-persist-webextension-storage": "1.0.0",
