@@ -1,6 +1,8 @@
 export type AlarmConfig = {
   name: 'meeting';
+  title: string;
   meetingUrl: string;
+  startTime: string;
 };
 chrome.alarms.onAlarm.addListener((alarm) => {
   const alarmConfig: AlarmConfig = JSON.parse(alarm.name);
