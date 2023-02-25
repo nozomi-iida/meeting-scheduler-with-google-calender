@@ -26,3 +26,15 @@ export const extractUrlsFromString = (str: string): string[] => {
 
   return meetingUrls;
 };
+
+export const getGoogleAuthToken = (): Promise<string> => {
+  return new Promise((resolve) => {
+    chrome.storage.local.get('token', (item) => {
+      if (item.token) {
+        resolve(item.token);
+      } else {
+        resolve('');
+      }
+    });
+  });
+};

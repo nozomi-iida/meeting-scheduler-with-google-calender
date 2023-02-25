@@ -4,7 +4,7 @@ import qs from 'qs';
 
 import { AlarmConfig } from '../background';
 import { CalenderEvent } from '../shared/google-calender/types';
-import { extractUrlsFromString } from '../shared/utils';
+import { extractUrlsFromString, getGoogleAuthToken } from '../shared/utils';
 
 const Popup = (): ReactElement => {
   const [isSignIn, setIsSignIn] = useState(true);
@@ -16,52 +16,65 @@ const Popup = (): ReactElement => {
       setIsSignIn(!!token);
     });
   };
-  const onSetMeetings = () => {
-    chrome.storage.local.get('token', async (item) => {
-      if (!item.token) return;
 
-      const query = qs.stringify({
-        timeMax: dayjs().endOf('day').toISOString(),
-        timeMin: dayjs().startOf('day').toISOString(),
-      });
-      const eventsData = await fetch(
-        `https://www.googleapis.com/calendar/v3/calendars/iida19990106@gmail.com/events?${query}`,
-        {
-          headers: {
-            Authorization: `Bearer ${item.token}`,
-          },
-        }
-      ).then((res) => res.json());
-      const calenderItems: CalenderEvent[] = eventsData.items;
+  const removeAlarms = () => {
+    alarms.forEach((alarm) => {
+      chrome.alarms.clear(JSON.stringify(alarm));
+    });
+  };
 
-      calenderItems.forEach((item) => {
-        if (new Date().getTime() > new Date(item.start.dateTime).getTime()) return;
+  const getEvents = async (): Promise<CalenderEvent[]> => {
+    const token = await getGoogleAuthToken();
 
-        const meetingUrls = extractUrlsFromString(item.description);
-        if (item.hangoutLink) {
-          meetingUrls.push(item.hangoutLink);
-        }
-        const alarmConfigs: AlarmConfig[] = [];
+    if (!token) return [];
 
-        meetingUrls.forEach((meetingUrl) => {
-          const alarmConfig: AlarmConfig = {
-            name: 'meeting',
-            title: item.summary,
-            meetingUrl: meetingUrl,
-            startTime: item.start.dateTime,
-          };
-          alarmConfigs.push(alarmConfig);
+    const query = qs.stringify({
+      timeMax: dayjs().endOf('day').toISOString(),
+      timeMin: dayjs().startOf('day').toISOString(),
+    });
+    const eventsData = await fetch(
+      `https://www.googleapis.com/calendar/v3/calendars/iida19990106@gmail.com/events?${query}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    ).then((res) => res.json());
 
-          const alarmTitles = alarms.map((alarm) => alarm.title);
-          if (!alarmTitles.includes(item.summary)) return;
+    return eventsData.items;
+  };
 
-          chrome.alarms.create(JSON.stringify(alarmConfig), {
-            when: new Date(item.start.dateTime).getTime(),
-          });
+  const addAlarms = (events: CalenderEvent[]) => {
+    const alarmConfigs: AlarmConfig[] = [];
+    events.forEach((event) => {
+      if (new Date().getTime() > new Date(event.start.dateTime).getTime()) return;
+
+      const meetingUrls = extractUrlsFromString(event.description);
+      if (event.hangoutLink) {
+        meetingUrls.push(event.hangoutLink);
+      }
+
+      meetingUrls.forEach((meetingUrl) => {
+        const alarmConfig: AlarmConfig = {
+          name: 'meeting',
+          title: event.summary,
+          meetingUrl: meetingUrl,
+          startTime: event.start.dateTime,
+        };
+        alarmConfigs.push(alarmConfig);
+
+        chrome.alarms.create(JSON.stringify(alarmConfig), {
+          when: new Date(event.start.dateTime).getTime(),
         });
-        setAlarms(alarmConfigs);
       });
     });
+    setAlarms(alarmConfigs);
+  };
+
+  const onSetMeetings = async () => {
+    removeAlarms();
+    const events = await getEvents();
+    addAlarms(events);
   };
 
   useEffect(() => {

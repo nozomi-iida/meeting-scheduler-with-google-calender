@@ -6,7 +6,6 @@ export type AlarmConfig = {
 };
 
 chrome.alarms.onAlarm.addListener((alarm) => {
-  console.log('Alarm fired');
   const alarmConfig: AlarmConfig = JSON.parse(alarm.name);
 
   if (alarmConfig.name === 'meeting') {
