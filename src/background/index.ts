@@ -1,3 +1,5 @@
+import { addAlarms, getEvents, removeAlarms } from '../shared/utils';
+
 export type AlarmConfig = {
   name: 'meeting';
   title: string;
@@ -14,6 +16,12 @@ chrome.alarms.onAlarm.addListener((alarm) => {
     });
     return;
   }
+});
+
+chrome.runtime.onStartup.addListener(async () => {
+  await removeAlarms();
+  const events = await getEvents();
+  await addAlarms(events);
 });
 
 export {};

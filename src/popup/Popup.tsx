@@ -1,10 +1,8 @@
 import { ReactElement, useEffect, useState } from 'react';
 import dayjs from 'dayjs';
-import qs from 'qs';
 
 import { AlarmConfig } from '../background';
-import { CalenderEvent } from '../shared/google-calender/types';
-import { extractUrlsFromString, getGoogleAuthToken } from '../shared/utils';
+import { addAlarms, getEvents, removeAlarms } from '../shared/utils';
 
 const Popup = (): ReactElement => {
   const [isSignIn, setIsSignIn] = useState(true);
@@ -17,64 +15,11 @@ const Popup = (): ReactElement => {
     });
   };
 
-  const removeAlarms = () => {
-    alarms.forEach((alarm) => {
-      chrome.alarms.clear(JSON.stringify(alarm));
-    });
-  };
-
-  const getEvents = async (): Promise<CalenderEvent[]> => {
-    const token = await getGoogleAuthToken();
-
-    if (!token) return [];
-
-    const query = qs.stringify({
-      timeMax: dayjs().endOf('day').toISOString(),
-      timeMin: dayjs().startOf('day').toISOString(),
-    });
-    const eventsData = await fetch(
-      `https://www.googleapis.com/calendar/v3/calendars/iida19990106@gmail.com/events?${query}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    ).then((res) => res.json());
-
-    return eventsData.items;
-  };
-
-  const addAlarms = (events: CalenderEvent[]) => {
-    const alarmConfigs: AlarmConfig[] = [];
-    events.forEach((event) => {
-      if (new Date().getTime() > new Date(event.start.dateTime).getTime()) return;
-
-      const meetingUrls = extractUrlsFromString(event.description);
-      if (event.hangoutLink) {
-        meetingUrls.push(event.hangoutLink);
-      }
-
-      meetingUrls.forEach((meetingUrl) => {
-        const alarmConfig: AlarmConfig = {
-          name: 'meeting',
-          title: event.summary,
-          meetingUrl: meetingUrl,
-          startTime: event.start.dateTime,
-        };
-        alarmConfigs.push(alarmConfig);
-
-        chrome.alarms.create(JSON.stringify(alarmConfig), {
-          when: new Date(event.start.dateTime).getTime(),
-        });
-      });
-    });
-    setAlarms(alarmConfigs);
-  };
-
   const onSetMeetings = async () => {
     removeAlarms();
     const events = await getEvents();
-    addAlarms(events);
+    const alarmConfigs = addAlarms(events);
+    setAlarms(alarmConfigs);
   };
 
   useEffect(() => {
