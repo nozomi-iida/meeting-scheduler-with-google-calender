@@ -4,13 +4,16 @@ export type AlarmConfig = {
   meetingUrl: string;
   startTime: string;
 };
+
 chrome.alarms.onAlarm.addListener((alarm) => {
+  console.log('Alarm fired');
   const alarmConfig: AlarmConfig = JSON.parse(alarm.name);
 
   if (alarmConfig.name === 'meeting') {
     chrome.tabs.create({
       url: alarmConfig.meetingUrl,
     });
+    return;
   }
 });
 

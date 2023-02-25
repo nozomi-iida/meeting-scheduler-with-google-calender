@@ -18,12 +18,9 @@ const Popup = (): ReactElement => {
   };
   const onSetMeetings = () => {
     chrome.storage.local.get('token', async (item) => {
-      chrome.alarms.clearAll();
-
       if (!item.token) return;
 
       const query = qs.stringify({
-        // TODO: 日本時間にする
         timeMax: dayjs().endOf('day').toISOString(),
         timeMin: dayjs().startOf('day').toISOString(),
       });
@@ -35,7 +32,6 @@ const Popup = (): ReactElement => {
           },
         }
       ).then((res) => res.json());
-
       const calenderItems: CalenderEvent[] = eventsData.items;
 
       calenderItems.forEach((item) => {
@@ -48,14 +44,17 @@ const Popup = (): ReactElement => {
         const alarmConfigs: AlarmConfig[] = [];
 
         meetingUrls.forEach((meetingUrl) => {
-          alarmConfigs.push({
+          const alarmConfig: AlarmConfig = {
             name: 'meeting',
             title: item.summary,
             meetingUrl: meetingUrl,
             startTime: item.start.dateTime,
-          });
-        });
-        alarmConfigs.forEach((alarmConfig) => {
+          };
+          alarmConfigs.push(alarmConfig);
+
+          const alarmTitles = alarms.map((alarm) => alarm.title);
+          if (!alarmTitles.includes(item.summary)) return;
+
           chrome.alarms.create(JSON.stringify(alarmConfig), {
             when: new Date(item.start.dateTime).getTime(),
           });
@@ -96,7 +95,7 @@ const Popup = (): ReactElement => {
           onClick={onSetMeetings}
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded block mx-auto"
         >
-          Set Meetings
+          Refetch Meetings
         </button>
       ) : (
         <button
