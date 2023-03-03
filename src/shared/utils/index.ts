@@ -1,8 +1,8 @@
 import dayjs from 'dayjs';
-import qs from 'qs';
 
 import { AlarmConfig } from '../../background';
-import { CalenderEvent } from '../google-calender/types';
+import { calenderClient } from '../google-calender/calenderClient';
+import { Calender, CalenderEvent } from '../google-calender/types';
 
 export const isDev = process.env.NODE_ENV === 'development';
 
@@ -65,21 +65,33 @@ export const getEvents = async (): Promise<CalenderEvent[]> => {
   const token = await getGoogleAuthToken();
 
   if (!token) return [];
+  const events: CalenderEvent[] = [];
+  const calenderData = await calenderClient<{ items: Calender[] }>('/users/me/calendarList');
+  const nonReaderCalenders = calenderData.data.items.filter(
+    (calender) => calender.accessRole !== 'reader'
+  );
 
-  const query = qs.stringify({
+  const query = {
     timeMax: dayjs().endOf('day').toISOString(),
     timeMin: dayjs().startOf('day').toISOString(),
-  });
-  const eventsData = await fetch(
-    `https://www.googleapis.com/calendar/v3/calendars/iida19990106@gmail.com/events?${query}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  ).then((res) => res.json());
+  };
+  await Promise.all(
+    nonReaderCalenders.map(async (calender) => {
+      const eventsData = await calenderClient<{ items: CalenderEvent[] }>(
+        `/calendars/${calender.id}/events`,
+        { params: query }
+      );
+      events.push(...eventsData.data.items);
+    })
+  );
 
-  return eventsData.items;
+  events.sort((a, b) => {
+    const aTime = new Date(a.start.dateTime).getTime();
+    const bTime = new Date(b.start.dateTime).getTime();
+    return aTime - bTime;
+  });
+
+  return events;
 };
 
 export const addAlarms = (events: CalenderEvent[]): AlarmConfig[] => {
