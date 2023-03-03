@@ -4,18 +4,13 @@ import dayjs from 'dayjs';
 import { ExternalLink } from 'tabler-icons-react';
 
 import { AlarmConfig } from '../background';
+import { useAuth } from '../hooks/useAuth';
 import { addAlarms, getEvents, removeAlarms } from '../shared/utils';
 
 const Popup = (): ReactElement => {
-  const [isSignIn, setIsSignIn] = useState(true);
+  const { token, onSignIn } = useAuth();
   const [alarms, setAlarms] = useState<AlarmConfig[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-
-  const onSignIn = () => {
-    chrome.identity.getAuthToken({ interactive: true }, function (token) {
-      setIsSignIn(!!token);
-    });
-  };
 
   const onSetMeetings = async () => {
     setIsLoading(true);
@@ -31,19 +26,16 @@ const Popup = (): ReactElement => {
   };
 
   useEffect(() => {
-    chrome.identity.getAuthToken({}, function (token) {
-      if (token) {
-        setIsSignIn(!!token);
-        chrome.alarms.getAll((alarms) => {
-          const alarmConfigs: AlarmConfig[] = [];
-          alarms.forEach((el) => {
-            alarmConfigs.push(JSON.parse(el.name));
-          });
-          setAlarms(alarmConfigs);
-        });
-      }
+    if (!token) return;
+
+    chrome.alarms.getAll((alarms) => {
+      const alarmConfigs: AlarmConfig[] = [];
+      alarms.forEach((el) => {
+        alarmConfigs.push(JSON.parse(el.name));
+      });
+      setAlarms(alarmConfigs);
     });
-  }, []);
+  }, [token]);
 
   return (
     <ChakraProvider>
@@ -62,12 +54,14 @@ const Popup = (): ReactElement => {
             </Flex>
           ))}
         </Box>
-        {isSignIn ? (
+        {token ? (
           <Button colorScheme="blue" onClick={onSetMeetings} isLoading={isLoading}>
             Refetch Meetings
           </Button>
         ) : (
-          <Button onClick={onSignIn}>Sign In</Button>
+          <Button colorScheme="blue" onClick={onSignIn}>
+            Sign In
+          </Button>
         )}
       </Flex>
     </ChakraProvider>
