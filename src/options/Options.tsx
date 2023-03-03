@@ -12,22 +12,22 @@ import {
   VStack,
 } from '@chakra-ui/react';
 
+import { useAuth } from '../hooks/useAuth';
 import { Calender } from '../shared/google-calender/types';
-import { getCalenders } from '../shared/utils';
+import { getCalenders, getGoogleAuthToken } from '../shared/utils';
 
 const Options = (): ReactElement => {
   const [calenders, setCalenders] = useState<Calender[]>([]);
+  const { token, onSignIn, onSignOut } = useAuth();
 
   useEffect(() => {
     (async () => {
+      if (!token) return;
+
       const calenders = await getCalenders();
       setCalenders(calenders);
     })();
-
-    chrome.identity.getAuthToken({ interactive: true }, (token) => {
-      console.log(token);
-    });
-  }, []);
+  }, [token]);
 
   return (
     <ChakraProvider>
@@ -37,22 +37,32 @@ const Options = (): ReactElement => {
           Settings
         </Heading>
         <Flex flexDir="column" gap={4} border="solid 1px #dde2e7" p={8} borderRadius="sm">
-          <FormControl>
-            <FormLabel fontSize="lg" fontWeight="bold">
-              Calenders List
-            </FormLabel>
-            <VStack align="start">
-              <CheckboxGroup>
-                {calenders.map((calender) => (
-                  <Checkbox value={calender.id} key={calender.id}>
-                    {calender.summary}
-                  </Checkbox>
-                ))}
-              </CheckboxGroup>
-            </VStack>
-          </FormControl>
+          {token && (
+            <FormControl>
+              <FormLabel fontSize="lg" fontWeight="bold">
+                Calenders List
+              </FormLabel>
+              <VStack align="start">
+                <CheckboxGroup>
+                  {calenders.map((calender) => (
+                    <Checkbox value={calender.id} key={calender.id}>
+                      {calender.summary}
+                    </Checkbox>
+                  ))}
+                </CheckboxGroup>
+              </VStack>
+            </FormControl>
+          )}
           <Box>
-            <Button colorScheme="red">Sign Out</Button>
+            {token ? (
+              <Button colorScheme="red" onClick={onSignOut}>
+                Sign Out
+              </Button>
+            ) : (
+              <Button colorScheme="blue" onClick={onSignIn}>
+                Sign In
+              </Button>
+            )}
           </Box>
         </Flex>
       </Box>
