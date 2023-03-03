@@ -3,6 +3,7 @@ import { addAlarms, getEvents, removeAlarms } from '../shared/utils';
 export type AlarmConfig = {
   name: 'meeting';
   title: string;
+  htmlLink: string;
   meetingUrl: string;
   startTime: string;
 };

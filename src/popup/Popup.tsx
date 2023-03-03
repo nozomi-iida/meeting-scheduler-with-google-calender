@@ -1,5 +1,7 @@
 import { ReactElement, useEffect, useState } from 'react';
+import { Box, Button, ChakraProvider, Flex, Heading, Icon, Link, Text } from '@chakra-ui/react';
 import dayjs from 'dayjs';
+import { ExternalLink } from 'tabler-icons-react';
 
 import { AlarmConfig } from '../background';
 import { addAlarms, getEvents, removeAlarms } from '../shared/utils';
@@ -7,6 +9,7 @@ import { addAlarms, getEvents, removeAlarms } from '../shared/utils';
 const Popup = (): ReactElement => {
   const [isSignIn, setIsSignIn] = useState(true);
   const [alarms, setAlarms] = useState<AlarmConfig[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const onSignIn = () => {
     chrome.identity.getAuthToken({ interactive: true }, function (token) {
@@ -16,10 +19,16 @@ const Popup = (): ReactElement => {
   };
 
   const onSetMeetings = async () => {
+    setIsLoading(true);
     removeAlarms();
     const events = await getEvents();
     const alarmConfigs = addAlarms(events);
     setAlarms(alarmConfigs);
+    setIsLoading(false);
+  };
+
+  const onOpenEvent = (htmlLink: string) => {
+    chrome.tabs.create({ url: htmlLink });
   };
 
   useEffect(() => {
@@ -39,31 +48,31 @@ const Popup = (): ReactElement => {
   }, []);
 
   return (
-    <div className="p-4 flex flex-col gap-4">
-      <h1 className="whitespace-nowrap text-2xl">Meeting Scheduler</h1>
-      <p className="text-xl">Today Meetings</p>
-      {alarms.map((alarm) => (
-        <div key={alarm.title} className="flex gap-2">
-          <p>{dayjs(alarm.startTime).format('A h:mm')}</p>
-          <p>{alarm.title}</p>
-        </div>
-      ))}
-      {isSignIn ? (
-        <button
-          onClick={onSetMeetings}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded block mx-auto"
-        >
-          Refetch Meetings
-        </button>
-      ) : (
-        <button
-          onClick={onSignIn}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded block mx-auto"
-        >
-          Sign In
-        </button>
-      )}
-    </div>
+    <ChakraProvider>
+      <Flex flexDir="column" gap={2} p={4}>
+        <Heading whiteSpace="nowrap">Meeting Scheduler</Heading>
+        <Text fontSize="lg" fontWeight="bold">
+          Today Meetings
+        </Text>
+        <Box>
+          {alarms.map((alarm) => (
+            <Flex fontSize="md" align="center" key={alarm.htmlLink}>
+              <Link mr="4px" onClick={() => onOpenEvent(alarm.htmlLink)}>
+                {dayjs(alarm.startTime).format('A h:mm')} {alarm.title}
+              </Link>
+              <Icon as={ExternalLink} />
+            </Flex>
+          ))}
+        </Box>
+        {isSignIn ? (
+          <Button colorScheme="blue" onClick={onSetMeetings} isLoading={isLoading}>
+            Refetch Meetings
+          </Button>
+        ) : (
+          <Button onClick={onSignIn}>Sign In</Button>
+        )}
+      </Flex>
+    </ChakraProvider>
   );
 };
 

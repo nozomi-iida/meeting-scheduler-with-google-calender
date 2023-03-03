@@ -96,6 +96,7 @@ export const addAlarms = (events: CalenderEvent[]): AlarmConfig[] => {
       const alarmConfig: AlarmConfig = {
         name: 'meeting',
         title: event.summary,
+        htmlLink: event.htmlLink,
         meetingUrl: meetingUrl,
         startTime: event.start.dateTime,
       };
