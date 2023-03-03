@@ -13,7 +13,6 @@ const Popup = (): ReactElement => {
 
   const onSignIn = () => {
     chrome.identity.getAuthToken({ interactive: true }, function (token) {
-      chrome.storage.local.set({ token });
       setIsSignIn(!!token);
     });
   };
@@ -34,7 +33,6 @@ const Popup = (): ReactElement => {
   useEffect(() => {
     chrome.identity.getAuthToken({}, function (token) {
       if (token) {
-        chrome.storage.local.set({ token });
         setIsSignIn(!!token);
         chrome.alarms.getAll((alarms) => {
           const alarmConfigs: AlarmConfig[] = [];

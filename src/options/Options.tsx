@@ -1,37 +1,62 @@
 import { ReactElement, useEffect, useState } from 'react';
+import {
+  Box,
+  Button,
+  ChakraProvider,
+  Checkbox,
+  CheckboxGroup,
+  Flex,
+  FormControl,
+  FormLabel,
+  Heading,
+  VStack,
+} from '@chakra-ui/react';
+
+import { Calender } from '../shared/google-calender/types';
+import { getCalenders } from '../shared/utils';
 
 const Options = (): ReactElement => {
-  const [calenders, setCalenders] = useState([]);
+  const [calenders, setCalenders] = useState<Calender[]>([]);
 
   useEffect(() => {
-    chrome.storage.local.get('token', async (item) => {
-      if (!item.token) return;
+    (async () => {
+      const calenders = await getCalenders();
+      setCalenders(calenders);
+    })();
 
-      const calendersData = await fetch(
-        'https://www.googleapis.com/calendar/v3/users/me/calendarList',
-        {
-          headers: {
-            Authorization: `Bearer ${item.token}`,
-          },
-        }
-      ).then((res) => res.json());
-
-      const eventsData = await fetch(
-        'https://www.googleapis.com/calendar/v3/calendars/iida19990106@gmail.com/events',
-        {
-          headers: {
-            Authorization: `Bearer ${item.token}`,
-          },
-        }
-      ).then((res) => res.json());
+    chrome.identity.getAuthToken({ interactive: true }, (token) => {
+      console.log(token);
     });
   }, []);
 
   return (
-    <div className="max-w-4xl mx-auto py-10">
-      <h1 className="text-2xl">Options</h1>
-      <ul></ul>
-    </div>
+    <ChakraProvider>
+      <Box maxW="530px" w="full" mx="auto" py={14}>
+        <Heading fontWeight="normal">Meeting Scheduler</Heading>
+        <Heading my={12} fontWeight="normal" as="h3" size="lg">
+          Settings
+        </Heading>
+        <Flex flexDir="column" gap={4} border="solid 1px #dde2e7" p={8} borderRadius="sm">
+          <FormControl>
+            <FormLabel fontSize="lg" fontWeight="bold">
+              Calenders List
+            </FormLabel>
+            <VStack align="start">
+              <CheckboxGroup>
+                {calenders.map((calender) => (
+                  <Checkbox value={calender.id} key={calender.id}>
+                    {calender.summary}
+                  </Checkbox>
+                ))}
+              </CheckboxGroup>
+            </VStack>
+          </FormControl>
+          <Box>
+            <Button colorScheme="red">Sign Out</Button>
+          </Box>
+        </Flex>
+      </Box>
+    </ChakraProvider>
   );
 };
 

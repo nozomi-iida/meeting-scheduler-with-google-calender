@@ -11,3 +11,17 @@ calenderClient.interceptors.request.use(async (config) => {
   config.headers.Authorization = token ? `Bearer ${token}` : '';
   return config;
 });
+
+calenderClient.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    if (error.response.status === 401) {
+      // tokenがなかった場合
+      // ここでログイン画面に飛ばす
+      console.log('tokenがなかった場合');
+    }
+    return Promise.reject(error);
+  }
+);

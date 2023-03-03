@@ -35,9 +35,9 @@ export const extractUrlsFromString = (str: string): string[] => {
 
 export const getGoogleAuthToken = (): Promise<string> => {
   return new Promise((resolve) => {
-    chrome.storage.local.get('token', (item) => {
-      if (item.token) {
-        resolve(item.token);
+    chrome.identity.getAuthToken({}, (token) => {
+      if (token) {
+        resolve(token);
       } else {
         resolve('');
       }
@@ -61,22 +61,24 @@ export const removeAlarms = async () => {
   });
 };
 
-export const getEvents = async (): Promise<CalenderEvent[]> => {
-  const token = await getGoogleAuthToken();
-
-  if (!token) return [];
-  const events: CalenderEvent[] = [];
+export const getCalenders = async (): Promise<Calender[]> => {
   const calenderData = await calenderClient<{ items: Calender[] }>('/users/me/calendarList');
   const nonReaderCalenders = calenderData.data.items.filter(
     (calender) => calender.accessRole !== 'reader'
   );
+  return nonReaderCalenders;
+};
+
+export const getEvents = async (): Promise<CalenderEvent[]> => {
+  const events: CalenderEvent[] = [];
+  const calenders = await getCalenders();
 
   const query = {
     timeMax: dayjs().endOf('day').toISOString(),
     timeMin: dayjs().startOf('day').toISOString(),
   };
   await Promise.all(
-    nonReaderCalenders.map(async (calender) => {
+    calenders.map(async (calender) => {
       const eventsData = await calenderClient<{ items: CalenderEvent[] }>(
         `/calendars/${calender.id}/events`,
         { params: query }
