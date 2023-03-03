@@ -26,17 +26,17 @@ const manifest: ManifestV3Export = {
   action: {
     default_popup: 'src/popup/popup.html',
     default_icon: {
-      '16': 'images/extension_16.png',
-      '32': 'images/extension_32.png',
-      '48': 'images/extension_48.png',
-      '128': 'images/extension_128.png',
+      '16': 'images/meeting_16.png',
+      '32': 'images/meeting_32.png',
+      '48': 'images/meeting_48.png',
+      '128': 'images/meeting_128.png',
     },
   },
   icons: {
-    '16': 'images/extension_16.png',
-    '32': 'images/extension_32.png',
-    '48': 'images/extension_48.png',
-    '128': 'images/extension_128.png',
+    '16': 'images/meeting_16.png',
+    '32': 'images/meeting_32.png',
+    '48': 'images/meeting_48.png',
+    '128': 'images/meeting_128.png',
   },
   permissions: ['storage', 'identity', 'alarms', 'notifications'],
   oauth2: {

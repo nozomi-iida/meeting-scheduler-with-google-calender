@@ -87,7 +87,7 @@ export const addAlarms = (events: CalenderEvent[]): AlarmConfig[] => {
   events.forEach((event) => {
     if (new Date().getTime() > new Date(event.start.dateTime).getTime()) return;
 
-    const meetingUrls = extractUrlsFromString(event.description);
+    const meetingUrls = extractUrlsFromString(event.description ?? '');
     if (event.hangoutLink) {
       meetingUrls.push(event.hangoutLink);
     }
