@@ -14,11 +14,17 @@ import {
 
 import { useAuth } from '../hooks/useAuth';
 import { Calender } from '../shared/google-calender/types';
-import { getCalenders, getGoogleAuthToken } from '../shared/utils';
+import { getCalenders } from '../shared/utils';
 
 const Options = (): ReactElement => {
   const [calenders, setCalenders] = useState<Calender[]>([]);
+  const [selectedCalenderIds, setSelectedCalenderIds] = useState<string[]>([]);
   const { token, onSignIn, onSignOut } = useAuth();
+  const onChangeCalenders = (calenderIds: string[]) => {
+    chrome.storage.sync.set({ calenders: calenderIds }, () => {
+      setSelectedCalenderIds(calenderIds);
+    });
+  };
 
   useEffect(() => {
     (async () => {
@@ -26,6 +32,11 @@ const Options = (): ReactElement => {
 
       const calenders = await getCalenders();
       setCalenders(calenders);
+      chrome.storage.sync.get(['calenders'], (result) => {
+        if (result.calenders) {
+          setSelectedCalenderIds(result.calenders);
+        }
+      });
     })();
   }, [token]);
 
@@ -43,7 +54,7 @@ const Options = (): ReactElement => {
                 Calenders List
               </FormLabel>
               <VStack align="start">
-                <CheckboxGroup>
+                <CheckboxGroup value={selectedCalenderIds} onChange={onChangeCalenders}>
                   {calenders.map((calender) => (
                     <Checkbox value={calender.id} key={calender.id}>
                       {calender.summary}
