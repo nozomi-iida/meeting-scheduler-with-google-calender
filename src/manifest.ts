@@ -14,7 +14,6 @@ const manifest: ManifestV3Export = {
     page: 'src/options/options.html',
     open_in_tab: true,
   },
-  web_accessible_resources: [],
   action: {
     default_popup: 'src/popup/popup.html',
     default_icon: {

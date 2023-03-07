@@ -42,18 +42,8 @@ function removeSrcFromHtmlPaths(): PluginOption {
         'options_page',
         'devtools_page',
         'chrome_url_overrides',
-        'web_accessible_resources',
       ]) {
-        if (key === 'web_accessible_resources') {
-          // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-          for (const [index, obj] of Object.entries<any>(manifest[key])) {
-            for (const [resourceIndex] of Object.entries(obj.resources)) {
-              processManifestKey(`web_accessible_resources[${index}].resources[${resourceIndex}]`);
-            }
-          }
-        } else {
-          processManifestKey(key);
-        }
+        processManifestKey(key);
       }
 
       if (glob.sync(`${config.build.outDir}/src/**/*.html`).length > 0) {

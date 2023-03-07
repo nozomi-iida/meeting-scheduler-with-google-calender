@@ -7,15 +7,15 @@ import manifest from './src/manifest';
 import removeSrcFromHtmlPaths from './utils/plugins/removeSrcFromHtmlPaths';
 
 export default defineConfig({
-  build: {
-    rollupOptions: {
-      input: {
-        welcome: join(__dirname, 'src/welcome/welcome.html'),
-      },
-      output: {
-        chunkFileNames: 'assets/chunk-[hash].js',
-      },
-    },
-  },
+  // build: {
+  //   rollupOptions: {
+  //     input: {
+  //       options: join(__dirname, 'src/options/options.html'),
+  //     },
+  //     output: {
+  //       chunkFileNames: 'assets/chunk-[hash].js',
+  //     },
+  //   },
+  // },
   plugins: [react(), crx({ manifest }), removeSrcFromHtmlPaths()],
 });
