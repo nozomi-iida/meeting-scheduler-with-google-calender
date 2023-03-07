@@ -14,14 +14,14 @@ import {
 
 import { useAuth } from '../hooks/useAuth';
 import { Calender } from '../shared/google-calender/types';
-import { getCalenders } from '../shared/utils';
+import { getActiveCalenderIds, getCalenders } from '../shared/utils';
 
 const Options = (): ReactElement => {
   const [calenders, setCalenders] = useState<Calender[]>([]);
   const [selectedCalenderIds, setSelectedCalenderIds] = useState<string[]>([]);
   const { token, onSignIn, onSignOut } = useAuth();
   const onChangeCalenders = (calenderIds: string[]) => {
-    chrome.storage.sync.set({ calenders: calenderIds }, () => {
+    chrome.storage.sync.set({ calenderIds }, () => {
       setSelectedCalenderIds(calenderIds);
     });
   };
@@ -32,11 +32,8 @@ const Options = (): ReactElement => {
 
       const calenders = await getCalenders();
       setCalenders(calenders);
-      chrome.storage.sync.get(['calenders'], (result) => {
-        if (result.calenders) {
-          setSelectedCalenderIds(result.calenders);
-        }
-      });
+      const activeCalenderIds = await getActiveCalenderIds();
+      setSelectedCalenderIds(activeCalenderIds);
     })();
   }, [token]);
 

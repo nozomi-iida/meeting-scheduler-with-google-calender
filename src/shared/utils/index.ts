@@ -69,18 +69,38 @@ export const getCalenders = async (): Promise<Calender[]> => {
   return nonReaderCalenders;
 };
 
+export const getActiveCalenderIds = async () => {
+  const activeCalenderIds = await new Promise<string[]>((resolve) => {
+    chrome.storage.sync.get(['calenderIds'], (result) => {
+      if (result.calenderIds) {
+        resolve(result.calenderIds);
+      } else {
+        resolve([]);
+      }
+    });
+  });
+
+  if (activeCalenderIds.length) {
+    return activeCalenderIds;
+  } else {
+    const calenders = await getCalenders();
+    const calenderIds = calenders.map((calender) => calender.id);
+    return calenderIds;
+  }
+};
+
 export const getEvents = async (): Promise<CalenderEvent[]> => {
   const events: CalenderEvent[] = [];
-  const calenders = await getCalenders();
+  const calenderIds = await getActiveCalenderIds();
 
   const query = {
     timeMax: dayjs().endOf('day').toISOString(),
     timeMin: dayjs().startOf('day').toISOString(),
   };
   await Promise.all(
-    calenders.map(async (calender) => {
+    calenderIds.map(async (calenderId) => {
       const eventsData = await calenderClient<{ items: CalenderEvent[] }>(
-        `/calendars/${calender.id}/events`,
+        `/calendars/${calenderId}/events`,
         { params: query }
       );
       events.push(...eventsData.data.items);
