@@ -12,9 +12,19 @@ chrome.alarms.onAlarm.addListener((alarm) => {
   const alarmConfig: AlarmConfig = JSON.parse(alarm.name);
 
   if (alarmConfig.name === 'meeting') {
-    chrome.tabs.create({
-      url: alarmConfig.meetingUrl,
-    });
+    chrome.tabs.create(
+      {
+        url: alarmConfig.meetingUrl,
+      },
+      () => {
+        chrome.notifications.create(alarmConfig.name, {
+          type: 'basic',
+          iconUrl: '/images/meeting_32.png',
+          title: 'Meeting',
+          message: `Meeting: ${alarmConfig.title} is starting now!`,
+        });
+      }
+    );
     return;
   }
 });
