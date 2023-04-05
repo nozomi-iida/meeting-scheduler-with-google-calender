@@ -1,8 +1,15 @@
 import { ManifestV3Export } from '@crxjs/vite-plugin';
+import * as dotenv from 'dotenv';
+dotenv.config();
+
+const isDev = process.env.VITE_ENV === 'dev';
+const name = isDev
+  ? '(dev)meeting-scheduler-with-google-calender'
+  : 'meeting-scheduler-with-google-calender';
 
 const manifest: ManifestV3Export = {
   manifest_version: 3,
-  name: 'meeting-scheduler-with-google-calender',
+  name,
   description:
     'A google extention that works with google calender and automatically opens the meeting URL when the time comes',
   version: '0.1',

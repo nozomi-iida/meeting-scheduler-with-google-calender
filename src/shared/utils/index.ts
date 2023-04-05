@@ -4,8 +4,6 @@ import { AlarmConfig } from '../../background';
 import { calenderClient } from '../google-calender/calenderClient';
 import { Calender, CalenderEvent } from '../google-calender/types';
 
-export const isDev = process.env.NODE_ENV === 'development';
-
 export const meetingApps: string[] = [
   'https://zoom.us/',
   'https://www.microsoft.com/',

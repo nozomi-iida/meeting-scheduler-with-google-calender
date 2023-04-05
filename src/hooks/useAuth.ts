@@ -14,7 +14,6 @@ export const useAuth = () => {
     if (!token) return;
 
     chrome.identity.removeCachedAuthToken({ token }, function () {
-      console.log('Last error:', chrome.runtime.lastError);
       const xhr = new XMLHttpRequest();
       xhr.open('GET', 'https://accounts.google.com/o/oauth2/revoke?token=' + token);
       xhr.send();
