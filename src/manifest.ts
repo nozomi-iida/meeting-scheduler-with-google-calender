@@ -12,7 +12,7 @@ const manifest: ManifestV3Export = {
   name,
   description:
     'A google extention that works with google calender and automatically opens the meeting URL when the time comes',
-  version: '0.1',
+  version: '0.2',
   background: {
     service_worker: 'src/background/index.ts',
   },
