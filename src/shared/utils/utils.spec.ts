@@ -2,13 +2,20 @@ import { extractUrlsFromString } from '.';
 
 describe('extractUrlsFromString', () => {
   test('extract google meet urls', () => {
-    const url =
-      'https://teams.microsoft.com/l/meetup-join/19%3ameeting_MWJlZjUzOTUtMTEwMy00Yjg5LWE4NmYtNTBiNTA2Yjk0ZTkx%40thread.v2/0?context=%7b%22Tid%22%3a%2268941627-0400-4744-9e93-68fb975cf595%22%2c%22Oid%22%3a%22a7fdeeb5-8bc8-4eb2-8692-d55a0c9f2926%22%7d';
-    const description = `コンピューターまたはモバイル アプリで参加できます会議に参加するにはここをクリックしてください<${url}>`;
+    const url = 'https://sakura.zoom.us/j/87544736063?pwd=U0l6U0V5RVJWM2l0eFRNbG1qb1Bsdz09';
+    const description = `
+      <br><br>
+      <p>時間: 2023年4月5日 08:30 PM 大阪、札幌、東京</p>
+      <p>Zoomミーティングに参加する
+        <br>
+        <a href=${url}>https://sakura.zoom.us/j/87544736063?pwd=U0l6U0V5RVJWM2l0eFRNbG1qb1Bsdz09</a>
+      </p>
+      <p>ミーティングID: 875 4473 6063<br>パスコード: 106609</p>
+    `;
+
     const meetingUrls = extractUrlsFromString(description);
 
     expect(meetingUrls.length).toEqual(1);
-    console.log(meetingUrls[0]);
 
     expect(meetingUrls[0]).toEqual(url);
   });

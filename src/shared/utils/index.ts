@@ -5,27 +5,21 @@ import { calenderClient } from '../google-calender/calenderClient';
 import { Calender, CalenderEvent } from '../google-calender/types';
 
 export const meetingApps: string[] = [
-  'https://zoom.us/',
-  'https://www.microsoft.com/',
-  'https://meet.google.com/',
-  'https://www.webex.com/',
-  'https://www.skype.com/',
-  'https://teams.microsoft.com/',
+  'zoom.us',
+  'meet.google.com',
+  'www.webex.com',
+  'www.skype.com',
+  'teams.microsoft.com/l/meetup-join',
 ];
 
 // get meeting urls from string
 export const extractUrlsFromString = (str: string): string[] => {
-  const urlRegex = /(https?|ftp)(:\/\/[\w\/:%#\$&\?\(\)~\.=\+\-]+)/g;
-
-  const urls = str.match(urlRegex) || [];
-
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(str, 'text/html');
+  const anchors = doc.querySelectorAll('a');
+  const urls = [...anchors].map((anchor) => anchor.href);
   const meetingUrls = urls.filter((url) => {
-    let matched = false;
-    meetingApps.forEach((app) => {
-      matched = url.startsWith(app);
-    });
-
-    return matched;
+    return meetingApps.some((app) => url?.indexOf(app) !== -1);
   });
 
   return meetingUrls;
@@ -117,7 +111,11 @@ export const getEvents = async (): Promise<CalenderEvent[]> => {
 export const addAlarms = (events: CalenderEvent[]): AlarmConfig[] => {
   const alarmConfigs: AlarmConfig[] = [];
   events.forEach((event) => {
-    if (new Date().getTime() > new Date(event.start.dateTime).getTime()) return;
+    const now = new Date();
+    const startDate = new Date(event.start.dateTime);
+    startDate.setFullYear(now.getFullYear(), now.getMonth(), now.getDate());
+
+    if (now.getTime() > startDate.getTime()) return;
 
     const meetingUrls = extractUrlsFromString(event.description ?? '');
     if (event.hangoutLink) {
@@ -130,7 +128,7 @@ export const addAlarms = (events: CalenderEvent[]): AlarmConfig[] => {
         title: event.summary,
         htmlLink: event.htmlLink,
         meetingUrl: meetingUrl,
-        startTime: event.start.dateTime,
+        startTime: startDate.toISOString(),
       };
 
       chrome.alarms.create(JSON.stringify(alarmConfig), {
