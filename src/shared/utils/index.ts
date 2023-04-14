@@ -12,13 +12,12 @@ export const meetingApps: string[] = [
   'teams.microsoft.com/l/meetup-join',
 ];
 
-// get meeting urls from string
 export const extractUrlsFromString = (str: string): string[] => {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(str, 'text/html');
-  const anchors = doc.querySelectorAll('a');
-  const urls = [...anchors].map((anchor) => anchor.href);
-  const meetingUrls = urls.filter((url) => {
+  const urlRegex = /(https?|ftp)(:\/\/[\w\/:%#\$&\?\(\)~\.=\+\-]+)/g;
+  const urls = str.match(urlRegex) || [];
+  const uniqUrls = [...new Set(urls)];
+
+  const meetingUrls = uniqUrls.filter((url) => {
     return meetingApps.some((app) => url?.indexOf(app) !== -1);
   });
 
@@ -128,11 +127,11 @@ export const addAlarms = (events: CalenderEvent[]): AlarmConfig[] => {
         title: event.summary,
         htmlLink: event.htmlLink,
         meetingUrl: meetingUrl,
-        startTime: startDate.toISOString(),
+        startTime: startDate.toString(),
       };
 
       chrome.alarms.create(JSON.stringify(alarmConfig), {
-        when: new Date(event.start.dateTime).getTime(),
+        when: startDate.getTime(),
       });
 
       alarmConfigs.push(alarmConfig);
