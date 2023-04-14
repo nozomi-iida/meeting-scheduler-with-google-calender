@@ -20,7 +20,6 @@
     "lint": "run-p lint:*",
     "lint:eslint": "eslint . --ext .js,.ts,.tsx --max-warnings 0 --ignore-path .gitignore",
     "lint:prettier": "prettier \"**/*.(md|json|yml)\" --ignore-path .gitignore --check",
-    "lint:stylelint": "stylelint \"**/*.css\" --ignore-path .gitignore",
     "test": "jest",
     "test:types": "tsc --noEmit",
     "prepare": "simple-git-hooks"

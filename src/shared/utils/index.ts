@@ -13,6 +13,7 @@ export const meetingApps: string[] = [
 ];
 
 export const extractUrlsFromString = (str: string): string[] => {
+  // eslint-disable-next-line no-useless-escape
   const urlRegex = /(https?|ftp)(:\/\/[\w\/:%#\$&\?\(\)~\.=\+\-]+)/g;
   const urls = str.match(urlRegex) || [];
   const uniqUrls = [...new Set(urls)];
