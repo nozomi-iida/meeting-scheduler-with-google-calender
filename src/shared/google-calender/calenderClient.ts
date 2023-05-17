@@ -17,7 +17,7 @@ calenderClient.interceptors.response.use(
     return response;
   },
   (error) => {
-    console.log('calender error', error.response.status);
+    console.log('Axios Error', error.response.status);
 
     if (error.response.status === 401) {
       // tokenがなかった場合

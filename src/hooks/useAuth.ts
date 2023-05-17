@@ -23,8 +23,6 @@ export const useAuth = () => {
   };
 
   useEffect(() => {
-    console.log('useEffect');
-
     (async () => {
       const token = await getGoogleAuthToken();
       if (!token) return;

@@ -81,6 +81,10 @@ export const getActiveCalenderIds = async () => {
   }
 };
 
+const isMeetingEvent = (event: CalenderEvent) => {
+  return !!event.start.dateTime;
+};
+
 export const getEvents = async (): Promise<CalenderEvent[]> => {
   const events: CalenderEvent[] = [];
   const calenderIds = await getActiveCalenderIds();
@@ -99,13 +103,17 @@ export const getEvents = async (): Promise<CalenderEvent[]> => {
     })
   );
 
-  events.sort((a, b) => {
+  const meetingEvents = events.filter((event) => {
+    return isMeetingEvent(event);
+  });
+
+  meetingEvents.sort((a, b) => {
     const aTime = new Date(a.start.dateTime).getTime();
     const bTime = new Date(b.start.dateTime).getTime();
     return aTime - bTime;
   });
 
-  return events;
+  return meetingEvents;
 };
 
 export const addAlarms = (events: CalenderEvent[]): AlarmConfig[] => {
